@@ -1,0 +1,83 @@
+[
+    {
+        "core": true, 
+        "citations": [
+            {
+                "core": true, 
+                "selfcite": false, 
+                "title": "D-deformed Wess-Zumino model and its renormalizability properties", 
+                "date": "2009-02-11", 
+                "collaboration": false, 
+                "document_type": "published", 
+                "id": 813073, 
+                "subject": "Theory-HEP"
+            }, 
+            {
+                "core": true, 
+                "selfcite": false, 
+                "title": "A Renormalisable non-anticommutative SU(N) x U(1) gauge theory in components", 
+                "date": "2009-09-10", 
+                "collaboration": false, 
+                "document_type": "published", 
+                "id": 830867, 
+                "subject": "Theory-HEP"
+            }, 
+            {
+                "core": true, 
+                "selfcite": false, 
+                "title": "Renormalisation of the non-anticommutativity parameter at two loops", 
+                "date": "2010-12-09", 
+                "collaboration": false, 
+                "document_type": "published", 
+                "id": 880180, 
+                "subject": "Theory-HEP"
+            }, 
+            {
+                "core": true, 
+                "selfcite": false, 
+                "title": "Twisted SUSY: Twisted symmetry versus renormalizability", 
+                "date": "2011-01-26", 
+                "collaboration": false, 
+                "document_type": "published", 
+                "id": 885666, 
+                "subject": "Theory-HEP"
+            }, 
+            {
+                "core": true, 
+                "selfcite": false, 
+                "title": "One-loop renormalizable Wess-Zumino model on a bosonic-fermionic noncommutative superspace", 
+                "date": "2014-03-19", 
+                "collaboration": false, 
+                "document_type": "published", 
+                "id": 1286468, 
+                "subject": "hep-th"
+            }, 
+            {
+                "core": true, 
+                "selfcite": false, 
+                "title": "The role of field redefinition on renormalisability of a general $N=\\frac{1}{2}$ supersymmetric gauge theories", 
+                "date": "2015-02-17", 
+                "collaboration": false, 
+                "document_type": "published", 
+                "id": 1351479, 
+                "subject": "hep-th"
+            }, 
+            {
+                "core": true, 
+                "selfcite": true, 
+                "title": "Nonanticommutative U(1) SYM theories: Renormalization, fixed points and infrared stability", 
+                "date": "2009-04-21", 
+                "collaboration": false, 
+                "document_type": "published", 
+                "id": 818428, 
+                "subject": "Theory-HEP"
+            }
+        ], 
+        "title": "A Renormalizable N=1/2 SYM theory with interacting matter", 
+        "date": "2009-01-20", 
+        "collaboration": false, 
+        "document_type": "published", 
+        "id": 811388, 
+        "subject": "Theory-HEP"
+    }
+]
