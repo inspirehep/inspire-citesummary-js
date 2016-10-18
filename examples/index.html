@@ -1,33 +1,9 @@
-<!-- Copyright (C) 2015, 2016 CERN.
-  Invenio is free software; you can redistribute it
-  and/or modify it under the terms of the GNU General Public License as
-  published by the Free Software Foundation; either version 2 of the
-  License, or (at your option) any later version.
-  Invenio is distributed in the hope that it will be
-  useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-  You should have received a copy of the GNU General Public License
-  along with Invenio; if not, write to the
-  Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
-  MA 02111-1307, USA.
-  In applying this license, CERN does not
-  waive the privileges and immunities granted to it by virtue of its status
-  as an Intergovernmental Organization or submit itself to any jurisdiction.
--->
 <html>
 <head>
-    <script src="../node_modules/angular/angular.js"></script>
-    <script src="../node_modules/jquery/dist/jquery.min.js"></script>
-    <script src="../node_modules/crossfilter/crossfilter.min.js"></script>
-    <script src="../node_modules/d3/d3.min.js"></script>
-    <script src="../node_modules/dc/dc.min.js"></script>
-    <script src="../dist/inspire-citesummary-js.js"></script>
     <link href="../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="../node_modules/dc/dc.min.css" rel="stylesheet"/>
     <style>
         body {
-            padding-top: 70px;
+            padding-top: 1em;
         }
     </style>
 </head>
@@ -36,13 +12,26 @@
     <div class="row-fluid">
         <div class="col-md-12">
             <div class="jumbotron">
-                <h1>INSPIRE Cite Summary Demo</h1>
-                <p>Citations for INSPIRE Record <a href="http://inspirehep.net/record/811388" target="_new">811388</a> </p>
+                <h1>INSPIRE Cite Summary Examples</h1>
             </div>
-            <div ng-app="citeSummary">
-                <cite-summary api-endpoint="http://localhost:8000/examples/data/811388.json"
-                              template="../dist/templates/citations.html">
-                </cite-summary>
+
+            <div class="well well-lg">
+                <h4>Paper Example</h4>
+                <p>The papers example shows a cite summary for a single paper. This differs from other examples in that
+                    there is only one paper of interest, with citations bring the primary focus</p>
+                <a href="paper.html" class="btn btn-info">View Example</a>
+            </div>
+
+            <div class="well well-lg">
+                <h4>Institution Example</h4>
+                <p>This shows a citation summary for 30,000 papers from Bicocca University, Milano</p>
+                <a href="institution.html" class="btn btn-info">View Example</a>
+            </div>
+
+            <div class="well well-lg">
+                <h4>Author Example</h4>
+                <p>This shows a citation summary for an author (Barbara Storaci, University of Zurich, Switzerland).</p>
+                <a href="author.html" class="btn btn-info">View Example</a>
             </div>
         </div>
     </div>

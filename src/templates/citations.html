@@ -1,6 +1,19 @@
 <div class="container-fluid">
-    <div class="row">
 
+    <div class="row-fluid">
+        <div class="col-md-12">
+            <div class="dc-data-count" style="float: left;">
+                <span class="filter-count"></span>
+                out of
+                <span class="total-count"></span>
+                |
+                <a href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>
+                <br> Use the Date Zoom to select some time frame.
+            </div>
+        </div>
+    </div>
+
+    <div class="row-fluid">
         <div class="col-md-12">
             <h4>Citation Overview</h4>
             <div id="citations"></div>
@@ -50,8 +63,6 @@
                                 <th>Title</th>
                                 <th>Citation Type</th>
                                 <th>Subject Area</th>
-                                <th>Self Citation</th>
-
                             </tr>
                             </thead>
                         </table>

@@ -1,0 +1,35 @@
+<html>
+<head>
+    <script src="../node_modules/angular/angular.js"></script>
+    <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="../node_modules/crossfilter/crossfilter.min.js"></script>
+    <script src="../node_modules/d3/d3.min.js"></script>
+    <script src="../node_modules/dc/dc.min.js"></script>
+    <script src="../dist/inspire-citesummary-js.js"></script>
+    <link href="../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="../node_modules/dc/dc.min.css" rel="stylesheet"/>
+    <style>
+        body {
+            padding-top: 1em;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="col-md-12">
+            <div class="jumbotron">
+                <h1>INSPIRE Cite Summary Demo</h1>
+                <p>Papers and Citations for the <a href="http://inspirehep.net/record/811388" target="_new">University of Bicocca</a>.
+                </p>
+            </div>
+            <div ng-app="citeSummary">
+                <cite-summary api-endpoint="http://localhost:8000/examples/data/bicocca.json"
+                              template="../dist/templates/citations.html">
+                </cite-summary>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

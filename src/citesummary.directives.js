@@ -15,7 +15,7 @@
                     $scope.vm.data = result;
 
                     setTimeout(function () {
-                        citesummary_vis.render($scope.vm.data);
+                        citeSummaryVis.renderSummary($scope.vm.data);
                     }, 0);
                 });
 

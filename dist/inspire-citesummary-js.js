@@ -46,7 +46,7 @@
                     $scope.vm.data = result;
 
                     setTimeout(function () {
-                        citesummary_vis.render($scope.vm.data);
+                        citeSummaryVis.renderSummary($scope.vm.data);
                     }, 0);
                 });
 
@@ -85,7 +85,6 @@
 
                         load: function (apiEndpoint) {
                             return $http.get(apiEndpoint).then(function (response) {
-                                console.debug(response.data);
                                 return response.data;
                             }).catch(function (value) {
                                 console.error('cannot fetch content from ' + apiEndpoint, value);
@@ -99,17 +98,25 @@
     ;
 }(angular));
 
-var citesummary_vis = (function () {
+var citeSummaryVis = (function () {
 
-    var self_cite_colors = d3.scale.ordinal().domain(["self", "not self"]).range(["#3498db", "#e74c3c"]);
-    var subject_area_colors = d3.scale.ordinal().range(["#95a5a6", "#7f8c8d", "#34495e", "#8e44ad"]);
-    var citation_type_colors = d3.scale.ordinal().domain(["preprint", "article"]).range(["#3498db", "#2980b9"]);
-    var date_format = "%d %b %Y";
+    var selfCiteColors = d3.scale.ordinal().domain(["self", "not self"]).range(["#3498db", "#e74c3c"]);
+    var subjectAreaColors = d3.scale.ordinal().range(["#1abc9c", "#27ae60", "#3498db", "#9b59b6", "#34495e", "#f39c12", "#d35400", "#c0392b", "#95a5a6"]);
+    var citationTypeColors = d3.scale.ordinal().range(["#1abc9c", "#27ae60", "#3498db", "#9b59b6", "#34495e", "#f39c12", "#d35400", "#c0392b", "#95a5a6"]);
+    var dateFormat = "%d %b %Y";
+
+    var cleanupMapping = {
+        "hep-th": "Theory-HEP",
+        "hep-ex": "Experiment-HEP",
+        "nucl-th": "Theory-Nucl",
+        "hep-ph": "Phenomenology-HEP",
+        "nucl-ex": "Experiment-Nucl",
+        "hep-lat": "Lattice"
+    };
 
     var formatNumber = d3.format(",d"),
-        formatDate = d3.time.format(date_format),
-        formatTime = d3.time.format("%I:%M %p"),
-        normalised_number_format = d3.format("s");
+        formatDate = d3.time.format(dateFormat),
+        formatTime = d3.time.format("%I:%M %p");
 
     var parseDate = function (d) {
         return new Date(d.substring(0, 4),
@@ -120,8 +127,8 @@ var citesummary_vis = (function () {
     var sortByDateAscending = function (a, b) {
 
         if (typeof a === 'string') {
-            a = d3.time.format(date_format).parse(a);
-            b = d3.time.format(date_format).parse(b);
+            a = d3.time.format(dateFormat).parse(a);
+            b = d3.time.format(dateFormat).parse(b);
             return b - a;
         } else {
             return b.citation_date - a.citation_date;
@@ -129,35 +136,45 @@ var citesummary_vis = (function () {
 
     };
 
-    var calculate_window_width = function () {
+    var calculateWindowWidth = function () {
         return $(window).width();
     };
 
-    var calculate_vis_width = function (window_width, normal_width_ratio) {
-        if (window_width <= 900) {
-            return window_width * 0.63;
+    var calculateVisWidth = function (windowWidth, normal_width_ratio) {
+        if (windowWidth <= 900) {
+            return windowWidth * 0.63;
         } else {
-            return window_width * normal_width_ratio;
+            return windowWidth * normal_width_ratio;
         }
     };
 
-    var process_data = function (data) {
+    var processData = function (data) {
         /*
          Parses the data fields
          */
 
-        var flattened = flatten_json(data);
-        console.log(flattened);
+        var flattened = flattenJson(data);
+
         flattened.forEach(function (d, i) {
             d.index = i;
             d.paper_date = parseDate(d.paper_date);
             d.citation_date = parseDate(d.citation_date);
+
+            if (d.paper_subject in cleanupMapping)
+                d.paper_subject = cleanupMapping[d.paper_subject];
+
+            if (d.citation_subject in cleanupMapping)
+                d.citation_subject = cleanupMapping[d.citation_subject];
+
+            if(d.citation_subject.indexOf('astro') != -1)
+                d.citation_subject = "Astrophysics";
         });
 
         return flattened;
     };
 
-    var flatten_json = function (data) {
+
+    var flattenJson = function (data) {
         /*
          Flattens the JSON out to be suitable for use in
          crossfilter.
@@ -173,14 +190,14 @@ var citesummary_vis = (function () {
             });
 
             d.citations.forEach(function (d) {
-                var _citation_record = $.extend({}, _record);
+                var _citationRecord = $.extend({}, _record);
 
                 Object.keys(d).forEach(function (k) {
                     if (k !== 'citations')
-                        _citation_record['citation_' + k] = d[k];
+                        _citationRecord['citation_' + k] = d[k];
                 });
 
-                flattened.push(_citation_record);
+                flattened.push(_citationRecord);
             });
 
         });
@@ -190,47 +207,40 @@ var citesummary_vis = (function () {
     };
 
     return {
-        render: function (data) {
+        renderSummary: function (data) {
 
-            var citation_data = process_data(data);
+            var citationData = processData(data);
 
-            var observed_papers = [];
+            var papers = crossfilter(citationData),
 
-            var papers = crossfilter(citation_data),
-
-                citations_by_date = papers.dimension(function (d) {
+                citationsByDate = papers.dimension(function (d) {
                     return d.citation_date;
                 }),
 
-                citation_type = papers.dimension(function (d) {
+                citationType = papers.dimension(function (d) {
                     return d.citation_document_type;
                 }),
 
-                self_citation = papers.dimension(function (d) {
+                selfCitation = papers.dimension(function (d) {
                     return d.citation_selfcite ? "self" : "not self";
                 }),
 
-                subject_area = papers.dimension(function (d) {
+                subjectArea = papers.dimension(function (d) {
                     return d.citation_subject;
-                }),
+                });
 
-                citation_count_group = citations_by_date.group();
+            var citationCountGroup = citationsByDate.group(),
+                citationTypeCount = citationType.group(),
+                selfTypeCount = selfCitation.group(),
+                subjectAreaCount = subjectArea.group();
 
-            var citation_type_count = citation_type.group(),
 
-                self_type_count = self_citation.group(),
-
-
-                subject_area_count = subject_area.group();
-
-            var top_value = 0;
-            var cumulative_citation_group = {
+            var cumulativeCitationGroup = {
                 all: function () {
                     var cumulate = 0;
                     var g = [];
-                    citation_count_group.all().forEach(function (d, i) {
+                    citationCountGroup.all().forEach(function (d, i) {
                         cumulate += d.value;
-                        top_value = cumulate;
                         g.push({
                             key: d.key,
                             value: cumulate,
@@ -241,43 +251,47 @@ var citesummary_vis = (function () {
                 }
             };
 
-            //var minCitationDate = new Date(citations_by_date.bottom(1)[0].citation_date);
-            //var maxCitationDate = new Date(citations_by_date.top(1)[0].citation_date);
+            var minPaperDate = new Date(citationsByDate.bottom(1)[0].citation_date);
+            var maxPaperDate = new Date(citationsByDate.top(1)[0].citation_date);
 
-            var minPaperDate = new Date(citations_by_date.bottom(1)[0].citation_date);
-            var maxPaperDate = new Date(citations_by_date.top(1)[0].citation_date);
-
-            //var minDate = minCitationDate < minPaperDate ? minCitationDate : minPaperDate;
-            //var maxDate = maxCitationDate > maxPaperDate ? maxCitationDate : maxPaperDate;
             var minDate = minPaperDate;
             var maxDate = maxPaperDate;
             minDate.setDate(minDate.getDate() - 30);
             maxDate.setDate(maxDate.getDate() + 30);
 
+            var windowWidth = calculateWindowWidth();
 
-            var window_width = calculate_window_width();
+
+            var all = papers.groupAll();
+
+            // Updated version
+            dc.dataCount(".dc-data-count")
+                .dimension(papers)
+                .group(all);
+
             var rptLine = dc.compositeChart(document.getElementById("citations"));
 
             rptLine
-                .width(calculate_vis_width(window_width, 0.85))
+                .width(calculateVisWidth(windowWidth, 0.85))
                 .height(300)
                 .margins({top: 10, right: 50, bottom: 30, left: 60})
                 .x(d3.time.scale().domain([minDate, maxDate]))
                 .xUnits(d3.time.months)
                 .renderHorizontalGridLines(true)
-                .dimension(citations_by_date)
+                .dimension(citationsByDate)
+                .elasticY(true)
                 .renderVerticalGridLines(true)
                 .compose([
                     dc.lineChart(rptLine)
 
-                        .group(cumulative_citation_group, 'Cumulative Citations')
+                        .group(cumulativeCitationGroup, 'Cumulative Citations')
                         .valueAccessor(function (d) {
                             return d.value;
                         })
                         .colors(['#2980b9']),
 
                     dc.barChart(rptLine)
-                        .group(citation_count_group, 'Citations')
+                        .group(citationCountGroup, 'Citations')
                         .colors(['#3498db'])
 
                 ]);
@@ -285,24 +299,29 @@ var citesummary_vis = (function () {
             rptLine.legend(dc.legend().x(80).y(20).itemHeight(13).gap(5))
                 .brushOn(true);
 
+
+
             dc.pieChart("#citation_subjects")
-                .dimension(citation_type)
-                .group(citation_type_count)
-                .colors(citation_type_colors);
+                .width(350)
+                .dimension(citationType)
+                .group(citationTypeCount)
+                .colors(citationTypeColors);
 
             dc.pieChart("#self_cites")
-                .dimension(self_citation)
-                .group(self_type_count)
-                .colors(self_cite_colors);
+                .width(350)
+                .dimension(selfCitation)
+                .group(selfTypeCount)
+                .colors(selfCiteColors);
 
             dc.pieChart("#subject_area")
-                .dimension(subject_area)
-                .group(subject_area_count)
-                .colors(subject_area_colors);
+                .width(350)
+                .dimension(subjectArea)
+                .group(subjectAreaCount)
+                .colors(subjectAreaColors);
 
 
             var detailTable = dc.dataTable('#data_table');
-            detailTable.dimension(citations_by_date)
+            detailTable.dimension(citationsByDate)
                 .group(function (d) {
                     return '<i class="fa fa-calendar"></i> ' + formatDate(d.citation_date);
                 })

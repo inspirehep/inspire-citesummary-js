@@ -11,7 +11,6 @@
 
                         load: function (apiEndpoint) {
                             return $http.get(apiEndpoint).then(function (response) {
-                                console.debug(response.data);
                                 return response.data;
                             }).catch(function (value) {
                                 console.error('cannot fetch content from ' + apiEndpoint, value);
