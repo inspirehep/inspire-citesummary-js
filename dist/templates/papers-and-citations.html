@@ -1,8 +1,19 @@
 <div class="container-fluid">
 
     <div class="row-fluid">
-        <div class="col-md-12">
-            <div class="dc-data-count" style="float: left;">
+        <div class="col-md-6">
+            <div id="papers_summary" class="dc-data-count" style="float: left;">
+                <span class="filter-count"></span>
+                out of
+                <span class="total-count"></span>
+                |
+                <a href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>
+                <br> Use the Date Zoom to select some time frame.
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div id="citations_summary" class="dc-data-count" style="float: left;">
                 <span class="filter-count"></span>
                 out of
                 <span class="total-count"></span>
@@ -14,7 +25,12 @@
     </div>
 
     <div class="row-fluid">
-        <div class="col-md-12">
+        <div class="col-md-6">
+            <h4>Paper Overview</h4>
+            <div id="papers"></div>
+        </div>
+
+        <div class="col-md-6">
             <h4>Citation Overview</h4>
             <div id="citations"></div>
         </div>
@@ -22,21 +38,69 @@
 
     <div class="clearfix"></div>
 
-    <div class="row-fluid">
-        <div class="col-md-4" style="height: 300px;">
-            <h4>Citation Types</h4>
-            <div id="citation_subjects" style="width: 30%; height: 200px;"></div>
+    <div class="row-fluid papers">
+        <div class="col-md-6">
+            <!--papers part-->
+            <div class="row-fluid">
+
+                <div class="col-md-12" style="height: 300px;">
+                    <h4>Papers by Year</h4>
+                    <div id="papers_year" style="height: 200px;"></div>
+                </div>
+
+
+                <div class="col-md-6">
+                    <h4>Paper Type</h4>
+                    <div id="papers_document_type">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h4>Paper Type</h4>
+                    <div id="papers_subject_area">
+
+                    </div>
+                </div>
+            </div>
+
         </div>
 
-        <div class="col-md-4" style="height: 300px;">
-            <h4>Self Citations</h4>
-            <div id="self_cites" style="width: 30%; height: 200px;"></div>
 
-        </div>
+        <div class="col-md-6">
+            <!--papers part-->
+            <div class="row-fluid">
 
-        <div class="col-md-4" style="height: 300px;">
-            <h4>Citation Subject Area</h4>
-            <div id="subject_area" style="width: 30%; height: 200px;"></div>
+                <div class="col-md-12" style="height: 300px;">
+                    <h4>Citations by Year</h4>
+                    <div id="citations_year"></div>
+                </div>
+
+
+                <div class="col-md-6">
+                    <h4>Citation Types</h4>
+                    <div id="citations_subjects"></div>
+                </div>
+
+                <div class="col-md-6">
+                    <h4>Citation Subject Area</h4>
+                    <div id="citations_subject_area"></div>
+                </div>
+
+
+                <div class="col-md-6" style="height: 300px;">
+                    <h4>Self Citations</h4>
+                    <div id="citations_self_cites"></div>
+
+                </div>
+
+                <div class="col-md-6" style="height: 300px;">
+                    <h4>Collaboration Papers</h4>
+                    <div id="citations_collaboration"></div>
+
+                </div>
+
+
+            </div>
         </div>
 
     </div>
@@ -54,7 +118,7 @@
                     <div class="visualization-panel col-md-12 scrollable">
 
 
-                        <table id="data_table" class="table dc-data-table">
+                        <table id="citations_data_table" class="table dc-data-table">
 
                             <thead>
                             <tr class="header">
