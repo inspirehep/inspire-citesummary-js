@@ -47,6 +47,7 @@
 
                     setTimeout(function () {
                         citeSummaryVis.renderSummary($scope.vm.data);
+                        citeSummaryVis.registerResizeListener($scope.vm.data);
                     }, 0);
                 });
 
@@ -130,9 +131,7 @@ var citeSummaryVis = (function () {
         "Elementary Particles": "General Physics"
     };
 
-    var formatNumber = d3.format(",d"),
-        formatDate = d3.time.format(dateFormat),
-        formatTime = d3.time.format("%I:%M %p"),
+    var formatDate = d3.time.format(dateFormat),
         normalisedNumberFormat = d3.format("s");
 
     var parseDate = function (d) {
@@ -157,17 +156,17 @@ var citeSummaryVis = (function () {
 
     var calculateVisWidth = function (windowWidth, normal_width_ratio) {
         if (windowWidth <= 900) {
-            return windowWidth * 0.63;
+            return windowWidth * 0.83;
         } else {
             return windowWidth * normal_width_ratio;
         }
     };
 
-    var createRowChart = function (placement, dimension, group, colors) {
+    var createRowChart = function (placement, dimension, group, colors, width) {
         var chart = dc.rowChart(placement)
             .dimension(dimension)
             .height(360)
-            .width(300)
+            .width(width)
             .group(group)
             .colors(colors);
 
@@ -178,8 +177,9 @@ var citeSummaryVis = (function () {
         });
     };
 
-    var createPieChart = function (placement, dimension, group, colors) {
+    var createPieChart = function (placement, dimension, group, colors, width) {
         var pieChart = dc.pieChart(placement)
+            .width(width)
             .dimension(dimension)
             .radius(60)
             .cx(80)
@@ -292,6 +292,32 @@ var citeSummaryVis = (function () {
     };
 
     return {
+
+        registerResizeListener: function (data) {
+
+            var rtime;
+            var timeout = false;
+            var delta = 200;
+            $(window).resize(function () {
+                rtime = new Date();
+                if (timeout === false) {
+                    timeout = true;
+                    setTimeout(resizeend, delta);
+                }
+            });
+
+            function resizeend() {
+                if (new Date() - rtime < delta) {
+                    setTimeout(resizeend, delta);
+                } else {
+                    timeout = false;
+                    d3.select("#contents").classed("hidden", true);
+                    d3.select("#spinner").classed("hidden", false);
+                    citeSummaryVis.renderSummary(data);
+                }
+            }
+        },
+
         renderSummary: function (data) {
             var multiPaper = false;
             if (data.length > 1) {
@@ -442,8 +468,8 @@ var citeSummaryVis = (function () {
                 var papersRptLine = dc.compositeChart(document.getElementById("papers"));
 
                 papersRptLine
-                    .width(calculateVisWidth(windowWidth, multiPaper ? 0.42 : 0.85))
-                    .height(150)
+                    .width(calculateVisWidth(windowWidth, multiPaper ? 0.47 : 0.85))
+                    .height(180)
                     .margins(margins)
                     .dimension(papersByYear)
                     .x(d3.time.scale().domain([minPaperDate, maxPaperDate]))
@@ -480,12 +506,13 @@ var citeSummaryVis = (function () {
                 papersRptLine.legend(dc.legend().x(80).y(20).itemHeight(13).gap(5))
                     .brushOn(true);
 
-                createRowChart("#papers_document_type", paperType, paperTypeCount, papersColor);
-                createRowChart("#papers_subject_area", paperSubjectArea, paperSubjectAreaCount, papersColor);
+                var _subChartWidth = calculateVisWidth(windowWidth, 0.24);
+                createRowChart("#papers_document_type", paperType, paperTypeCount, papersColor, _subChartWidth);
+                createRowChart("#papers_subject_area", paperSubjectArea, paperSubjectAreaCount, papersColor, _subChartWidth);
 
                 var citationExtent = [paperCitations.bottom(1)[0].paper_citation_count, paperCitations.top(1)[0].paper_citation_count];
                 var paperCitationCount = dc.barChart("#papers_citation_count")
-                    .width(600)
+                    .width(calculateVisWidth(windowWidth, 0.47))
                     .height(150)
                     .dimension(paperCitations)
                     .group(papersCitationGroup, 'Papers')
@@ -514,7 +541,7 @@ var citeSummaryVis = (function () {
 
             citationRptLine
                 .width(calculateVisWidth(windowWidth, multiPaper ? 0.42 : 0.85))
-                .height(150)
+                .height(180)
                 .margins(margins)
                 .x(d3.time.scale().domain([minCitationDate, maxCitationDate]))
                 .xUnits(d3.time.years)
@@ -546,16 +573,18 @@ var citeSummaryVis = (function () {
             citationRptLine.legend(dc.legend().x(80).y(20).itemHeight(13).gap(5))
                 .brushOn(true);
 
-            createRowChart("#citations_subjects", citationType, citationTypeCount, citationsColor);
-            createRowChart("#citations_subject_area", citationSubjectArea, citationSubjectAreaCount, citationsColor);
+            createRowChart("#citations_subjects", citationType, citationTypeCount, citationsColor, _subChartWidth);
+            createRowChart("#citations_subject_area", citationSubjectArea, citationSubjectAreaCount, citationsColor, _subChartWidth);
 
-            createPieChart("#citations_self_cites", selfCitation, selfTypeCount, selfCiteColors);
-            createPieChart("#citations_collaboration", citationIsCollaboration, citationIsCollaborationCount, collaborationColors);
+            createPieChart("#citations_self_cites", selfCitation, selfTypeCount, selfCiteColors, _subChartWidth);
+            createPieChart("#citations_collaboration", citationIsCollaboration, citationIsCollaborationCount, collaborationColors, _subChartWidth);
 
             var detailTable = dc.dataTable('#citations_data_table');
             detailTable.dimension(citationsByDate)
                 .group(function (d) {
-                    return d.paper_id + ' - ' + d.paper_title;
+                    return '<div class="dc-title-text"><a href="/record/' + d.paper_id + '">' + d.paper_title + '</a>' +
+                        ' <div class="dc-published-date label label-default">Published ' + formatDate(d.paper_date) + '</div> ' +
+                        '</div>';
                 })
 
                 .columns([
@@ -563,12 +592,12 @@ var citeSummaryVis = (function () {
                         return "";
                     },
                     function (d) {
-                        return '<span class="label label-info">Cited on ' + formatDate(d.citation_date) + '</span>';
+                        return '<div class="label label-info">Cited on ' + formatDate(d.citation_date) + '</div>';
                     },
 
                     function (d) {
-                        return '<span class="label ' + (d.citation_selfcite ? "label-danger" : "label-default") + '">' + (d.citation_selfcite ? " Self Citation" : "") + '</span> ' +
-                            '<a href="/record/' + d.citation_id + '" target="_blank"><strong>' + d.citation_id + '</strong> ' + d.citation_title + '</a>';
+                        return '<div class="label ' + (d.citation_selfcite ? "label-danger" : "label-default") + '">' + (d.citation_selfcite ? " Self Citation" : "") + '</div> ' +
+                            '<a href="/record/' + d.citation_id + '" target="_blank" class="dc-citation-link">' + d.citation_title + '</a>';
                     },
 
                     function (d) {
@@ -592,7 +621,6 @@ var citeSummaryVis = (function () {
 
             d3.select("#spinner").classed("hidden", true);
             d3.select("#contents").classed("hidden", false);
-
         }
     };
 

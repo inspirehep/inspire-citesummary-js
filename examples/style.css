@@ -53,6 +53,19 @@
     font-weight: bolder;
 }
 
+.dc-title-text {
+    font-weight: bolder;
+    font-size: 1.4em;
+}
+
+.dc-citation-link {
+    color: #2c3e50;
+}
+
+.dc-published-date {
+    font-size: .7em;
+}
+
 /*loader*/
 
 .spinner {

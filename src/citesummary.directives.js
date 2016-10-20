@@ -16,6 +16,7 @@
 
                     setTimeout(function () {
                         citeSummaryVis.renderSummary($scope.vm.data);
+                        citeSummaryVis.registerResizeListener($scope.vm.data);
                     }, 0);
                 });
 
