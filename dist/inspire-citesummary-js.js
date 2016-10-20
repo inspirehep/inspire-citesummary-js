@@ -590,6 +590,9 @@ var citeSummaryVis = (function () {
                 d3.select("#papers_summary .zero-papers .count").text(zero_count);
             }
 
+            d3.select("#spinner").classed("hidden", true);
+            d3.select("#contents").classed("hidden", false);
+
         }
     };
 

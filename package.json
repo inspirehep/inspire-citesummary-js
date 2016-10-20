@@ -1,12 +1,8 @@
-
 {
   "name": "inspire-citesummary-js",
   "version": "0.0.1",
   "description": "Cite Summary component for INSPIRE HEP",
-  "author": {
-    "name": "Eamonn Maguire",
-    "email": "eamonnmag@gmail.com"
-  },
+  "author": "Eamonn Maguire <eamonnmag@gmail.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/inspirehep/inspire-citesummary-js.git"
@@ -67,9 +63,22 @@
     "docs": "jsdoc  -c .jsdoc --pedantic src/",
     "test": "gulp test"
   },
-  "license": "GPLv2",
+  "license": "GPL-2.0",
   "bugs": {
     "url": "https://github.com/inspirehep/inspire-citesummary-js/issues"
   },
-  "homepage": "https://github.com/inspirehep/inspire-citesummary-js#readme"
+  "homepage": "https://github.com/inspirehep/inspire-citesummary-js#readme",
+  "main": "gulpfile.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "keywords": [
+    "visualization",
+    "cite",
+    "summary",
+    "inspire",
+    "citations",
+    "metrics"
+  ]
 }
