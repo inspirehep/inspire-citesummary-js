@@ -22,8 +22,9 @@
     stroke-width: 1px;
 }
 
-.label-info {
-    background-color: #3498db;
+.cite-info {
+    background-color: #f6f7f6;
+    color: #3182bd;
 }
 
 .dc-data-table {
@@ -55,18 +56,32 @@
 
 .dc-title-text {
     font-weight: bolder;
-    font-size: 1.4em;
+    font-size: 1em;
+
+}
+
+.dc-title-text a {
+    color: #7f8c8d;
+    font-size: 1.2em;
 }
 
 .dc-citation-link {
-    color: #2c3e50;
+    color: #3182bd;
+    font-size: 1em;
+    font-weight: bolder;
 }
 
 .dc-published-date {
     font-size: .7em;
+    padding: 3px 4px;
+    background-color: #f6f7f6;
+    color: #2c3e50;
 }
 
-/*loader*/
+/*
+  CSS Loader Animation
+  from http://tobiasahlin.com/spinkit/
+*/
 
 .spinner {
     margin: 100px auto;

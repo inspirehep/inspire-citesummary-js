@@ -1,5 +1,8 @@
 <html>
 <head>
+    <script type="text/javascript" async
+            src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
     <script src="../node_modules/angular/angular.js"></script>
     <script src="../node_modules/jquery/dist/jquery.min.js"></script>
     <script src="../node_modules/crossfilter2/crossfilter.min.js"></script>
@@ -20,7 +23,8 @@
         <div class="col-md-12">
             <div class="jumbotron">
                 <h1>INSPIRE Cite Summary Demo</h1>
-                <p>Papers and Citations for the <a href="http://inspirehep.net/record/811388" target="_new">University of Bicocca</a>.
+                <p>Papers and Citations for the <a href="http://inspirehep.net/record/811388" target="_new">University
+                    of Bicocca</a>.
                 </p>
             </div>
             <div ng-app="citeSummary">
@@ -31,5 +35,10 @@
         </div>
     </div>
 </div>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+    });
+</script>
 </body>
 </html>

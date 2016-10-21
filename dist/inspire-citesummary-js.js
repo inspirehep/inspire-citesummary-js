@@ -101,12 +101,14 @@
 
 var citeSummaryVis = (function () {
 
-    var selfCiteColors = d3.scale.ordinal().domain(["Self", "Not Self"]).range(["#3498db", "#e74c3c"]);
+    var selfCiteColors = d3.scale.ordinal().domain(["Not Self", "Self"]).range(["#3498db", "#e74c3c"]);
     var collaborationColors = d3.scale.ordinal().domain(["Other", "Collaboration Paper"]).range(["#95a5a6", "#ecf0f1"]);
     var dateFormat = "%d %b %Y";
     var zero_count = 0;
+    var papersColor = "#7f8c8d";
+    var citationsColor = "#3498db";
 
-    var cleanupMapping = {
+    var cleanSubjectAreaMapping = {
         "hep-th": "Theory-HEP",
         "hep-ex": "Experiment-HEP",
         "nucl-th": "Theory-Nucl",
@@ -130,6 +132,29 @@ var citeSummaryVis = (function () {
         "Cosmology": "Astrophysics",
         "Elementary Particles": "General Physics"
     };
+
+    var cleanPaperTypeMapping = {
+        "book": "Book",
+        "bookchapter": "Book Chapter",
+        "conferencepaper": "Conference Paper",
+        "note": "Note",
+        "proceedings": "Proceedings",
+        "published": "Published",
+        "report": "Report",
+        "review": "Review",
+        "thesis": "Thesis",
+        "": "None"
+    };
+
+    function renderMathJaxCallback() {
+        try {
+            setTimeout(function () {
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+            }, 1);
+        } catch (e) {
+            console.error("We're unable to run the MathJax formatting. Ensure you have added the library to your page.");
+        }
+    }
 
     var formatDate = d3.time.format(dateFormat),
         normalisedNumberFormat = d3.format("s");
@@ -162,23 +187,27 @@ var citeSummaryVis = (function () {
         }
     };
 
-    var createRowChart = function (placement, dimension, group, colors, width) {
+    var createRowChart = function (placement, dimension, group, colors, width, valueAccessor) {
         var chart = dc.rowChart(placement)
             .dimension(dimension)
             .height(360)
             .width(width)
             .group(group)
-            .colors(colors);
+            .elasticX(true)
+            .colors(colors)
+            .valueAccessor(valueAccessor);
 
         chart.xAxis().ticks(5);
         chart.xAxis().tickFormat(normalisedNumberFormat);
         chart.ordering(function (d) {
             return -d.value;
         });
+
+        chart.on("filtered", renderMathJaxCallback)
     };
 
     var createPieChart = function (placement, dimension, group, colors, width) {
-        var pieChart = dc.pieChart(placement)
+        var chart = dc.pieChart(placement)
             .width(width)
             .dimension(dimension)
             .radius(60)
@@ -189,9 +218,11 @@ var citeSummaryVis = (function () {
             .colors(colors)
             .legend(dc.legend2().x(170).y(0).itemHeight(12).gap(5).horizontal(1).legendWidth(90).itemWidth(95).showPercent(true));
 
-        pieChart.ordering(function (d) {
+        chart.ordering(function (d) {
             return -d.value;
         });
+
+        chart.on("filtered", renderMathJaxCallback)
 
     };
 
@@ -237,15 +268,20 @@ var citeSummaryVis = (function () {
 
             ["paper", "citation"].forEach(function (s) {
                 var subject = d[s + '_subject'];
-                if (d[s + '_subject'] in cleanupMapping) {
-                    d[s + '_subject'] = cleanupMapping[subject];
+                if (d[s + '_subject'] in cleanSubjectAreaMapping) {
+                    d[s + '_subject'] = cleanSubjectAreaMapping[subject];
                 } else {
-                    Object.keys(cleanupMapping).forEach(function (k) {
+                    Object.keys(cleanSubjectAreaMapping).forEach(function (k) {
                         if (subject.indexOf(k) != -1) {
-                            d[s + '_subject'] = cleanupMapping[k];
+                            d[s + '_subject'] = cleanSubjectAreaMapping[k];
                             return;
                         }
                     });
+                }
+
+                var doc_type = d[s + '_document_type'];
+                if (d[s + '_document_type'] in cleanPaperTypeMapping) {
+                    d[s + '_document_type'] = cleanPaperTypeMapping[doc_type];
                 }
             });
         });
@@ -352,12 +388,13 @@ var citeSummaryVis = (function () {
                     return d.citation_subject;
                 });
 
-
             var papersByDate = papers.dimension(function (d) {
                     return d.paper_date;
                 }),
                 papersByYear = papers.dimension(function (d) {
+
                     return d3.time.year(d.paper_date);
+
                 }),
                 paperType = papers.dimension(function (d) {
                     return d.paper_document_type;
@@ -371,9 +408,8 @@ var citeSummaryVis = (function () {
 
             var papersCountGroup = papersByYear.group().reduce(reduceAdd, reduceRemove, reduceInit);
             var papersCitationGroup = paperCitations.group().reduce(reduceAdd, reduceRemove, reduceInit);
-
-            var paperTypeCount = paperType.group(),
-                paperSubjectAreaCount = paperSubjectArea.group();
+            var paperSubjectAreaGroup = paperSubjectArea.group().reduce(reduceAdd, reduceRemove, reduceInit);
+            var paperTypeGroup = paperType.group().reduce(reduceAdd, reduceRemove, reduceInit);
 
             var citationsByYearGroup = citationsByYear.group(),
                 citationTypeCount = citationType.group(),
@@ -450,8 +486,7 @@ var citeSummaryVis = (function () {
                 .dimension(papers)
                 .group(allPapers)
                 .valueAccessor(function (d) {
-                    console.log(d);
-                    return d.paperCount;
+                    return d.value.paperCount;
                 });
 
             var margins = {top: 20, right: 20, bottom: 20, left: 40};
@@ -463,7 +498,7 @@ var citeSummaryVis = (function () {
                 minPaperDate.setDate(minPaperDate.getDate() - 30);
                 maxPaperDate.setDate(maxPaperDate.getDate() + 30);
 
-                var papersColor = "#95a5a6";
+
 
                 var papersRptLine = dc.compositeChart(document.getElementById("papers"));
 
@@ -476,7 +511,7 @@ var citeSummaryVis = (function () {
                     .xUnits(d3.time.years)
                     .xAxisLabel('Publication Year')
                     .yAxisLabel('# Papers')
-
+                    .elasticY(true)
                     .renderHorizontalGridLines(true)
                     .renderVerticalGridLines(true)
                     .compose([
@@ -501,20 +536,31 @@ var citeSummaryVis = (function () {
 
                     ]);
 
-                papersRptLine.yAxis().tickFormat(normalisedNumberFormat)
+                papersRptLine.yAxis().tickFormat(normalisedNumberFormat);
+                papersRptLine.on("filtered", renderMathJaxCallback);
 
                 papersRptLine.legend(dc.legend().x(80).y(20).itemHeight(13).gap(5))
                     .brushOn(true);
 
                 var _subChartWidth = calculateVisWidth(windowWidth, 0.24);
-                createRowChart("#papers_document_type", paperType, paperTypeCount, papersColor, _subChartWidth);
-                createRowChart("#papers_subject_area", paperSubjectArea, paperSubjectAreaCount, papersColor, _subChartWidth);
+
+                var paperCountValueAccessor = function (d) {
+                    return d.value.paperCount;
+                };
+
+                var valueAccessor = function (d) {
+                    return d.value;
+                };
+
+                createRowChart("#papers_document_type", paperType, paperTypeGroup, papersColor, _subChartWidth, paperCountValueAccessor);
+                createRowChart("#papers_subject_area", paperSubjectArea, paperSubjectAreaGroup, papersColor, _subChartWidth, paperCountValueAccessor);
 
                 var citationExtent = [paperCitations.bottom(1)[0].paper_citation_count, paperCitations.top(1)[0].paper_citation_count];
                 var paperCitationCount = dc.barChart("#papers_citation_count")
                     .width(calculateVisWidth(windowWidth, 0.47))
                     .height(150)
                     .dimension(paperCitations)
+                    .elasticY(true)
                     .group(papersCitationGroup, 'Papers')
                     .valueAccessor(function (d) {
                         return d.value.paperCount;
@@ -524,10 +570,9 @@ var citeSummaryVis = (function () {
                     .yAxisLabel('# Papers')
                     .colors(papersColor);
 
-                paperCitationCount.xAxis().tickFormat(normalisedNumberFormat)
-
+                paperCitationCount.xAxis().tickFormat(normalisedNumberFormat);
+                paperCitationCount.on("filtered", renderMathJaxCallback);
             }
-
 
             var citationRptLine = dc.compositeChart(document.getElementById("citations"));
 
@@ -537,7 +582,7 @@ var citeSummaryVis = (function () {
             minCitationDate.setDate(minCitationDate.getDate() - 30);
             maxCitationDate.setDate(maxCitationDate.getDate() + 30);
 
-            var citationsColor = "#3498db";
+
 
             citationRptLine
                 .width(calculateVisWidth(windowWidth, multiPaper ? 0.42 : 0.85))
@@ -547,7 +592,7 @@ var citeSummaryVis = (function () {
                 .xUnits(d3.time.years)
                 .xAxisLabel('Citation Year')
                 .yAxisLabel('# Citations')
-
+                .elasticY(true)
                 .renderHorizontalGridLines(true)
                 .dimension(citationsByYear)
                 .renderVerticalGridLines(true)
@@ -569,12 +614,13 @@ var citeSummaryVis = (function () {
                 ]);
 
             citationRptLine.yAxis().tickFormat(normalisedNumberFormat);
+            citationRptLine.on("filtered", renderMathJaxCallback);
 
             citationRptLine.legend(dc.legend().x(80).y(20).itemHeight(13).gap(5))
                 .brushOn(true);
 
-            createRowChart("#citations_subjects", citationType, citationTypeCount, citationsColor, _subChartWidth);
-            createRowChart("#citations_subject_area", citationSubjectArea, citationSubjectAreaCount, citationsColor, _subChartWidth);
+            createRowChart("#citations_subjects", citationType, citationTypeCount, citationsColor, _subChartWidth, valueAccessor);
+            createRowChart("#citations_subject_area", citationSubjectArea, citationSubjectAreaCount, citationsColor, _subChartWidth, valueAccessor);
 
             createPieChart("#citations_self_cites", selfCitation, selfTypeCount, selfCiteColors, _subChartWidth);
             createPieChart("#citations_collaboration", citationIsCollaboration, citationIsCollaborationCount, collaborationColors, _subChartWidth);
@@ -584,6 +630,7 @@ var citeSummaryVis = (function () {
                 .group(function (d) {
                     return '<div class="dc-title-text"><a href="/record/' + d.paper_id + '">' + d.paper_title + '</a>' +
                         ' <div class="dc-published-date label label-default">Published ' + formatDate(d.paper_date) + '</div> ' +
+                        '<p class="text-muted">' + d.paper_citation_count + ' citations including:</p> ' +
                         '</div>';
                 })
 
@@ -592,7 +639,7 @@ var citeSummaryVis = (function () {
                         return "";
                     },
                     function (d) {
-                        return '<div class="label label-info">Cited on ' + formatDate(d.citation_date) + '</div>';
+                        return '<div class="label label-info cite-info">Cited on ' + formatDate(d.citation_date) + '</div>';
                     },
 
                     function (d) {
@@ -611,6 +658,8 @@ var citeSummaryVis = (function () {
                 })
                 .order(sortByDateAscending);
 
+            detailTable.on("filtered", renderMathJaxCallback);
+
             dc.renderAll();
 
             d3.select("#papers_summary .total-papers").text(data.length);
@@ -619,8 +668,23 @@ var citeSummaryVis = (function () {
                 d3.select("#papers_summary .zero-papers .count").text(zero_count);
             }
 
+            // reset the loader
             d3.select("#spinner").classed("hidden", true);
             d3.select("#contents").classed("hidden", false);
+
+            setTimeout(
+                function () {
+                    renderMathJaxCallback();
+                }, 0
+            );
+
+            d3.select("#download_csv").on("click", function(e) {
+                var blob = new Blob([d3.csv.format(papersByDate.top(Infinity))],
+                    {type: "text/csv;charset=utf-8"});
+                saveAs(blob, 'data.csv');
+            });
+
+
         }
     };
 
