@@ -1,6 +1,6 @@
 {
   "name": "inspire-citesummary-js",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "Cite Summary component for INSPIRE HEP",
   "author": "Eamonn Maguire <eamonnmag@gmail.com>",
   "repository": {
