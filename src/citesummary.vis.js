@@ -45,6 +45,18 @@ var citeSummaryVis = (function () {
         "": "None"
     };
 
+    var margins = {top: 20, right: 20, bottom: 20, left: 40};
+
+
+    var paperCountValueAccessor = function (d) {
+        return d.value.paperCount;
+    };
+
+    var valueAccessor = function (d) {
+        return d.value;
+    };
+
+
     function renderMathJaxCallback() {
         try {
             setTimeout(function () {
@@ -388,7 +400,7 @@ var citeSummaryVis = (function () {
                     return d.value.paperCount;
                 });
 
-            var margins = {top: 20, right: 20, bottom: 20, left: 40};
+
             if (multiPaper) {
 
                 var minPaperDate = new Date(papersByDate.bottom(1)[0].paper_date);
@@ -396,7 +408,6 @@ var citeSummaryVis = (function () {
 
                 minPaperDate.setDate(minPaperDate.getDate() - 30);
                 maxPaperDate.setDate(maxPaperDate.getDate() + 30);
-
 
 
                 var papersRptLine = dc.compositeChart(document.getElementById("papers"));
@@ -443,13 +454,6 @@ var citeSummaryVis = (function () {
 
                 var _subChartWidth = calculateVisWidth(windowWidth, 0.24);
 
-                var paperCountValueAccessor = function (d) {
-                    return d.value.paperCount;
-                };
-
-                var valueAccessor = function (d) {
-                    return d.value;
-                };
 
                 createRowChart("#papers_document_type", paperType, paperTypeGroup, papersColor, _subChartWidth, paperCountValueAccessor);
                 createRowChart("#papers_subject_area", paperSubjectArea, paperSubjectAreaGroup, papersColor, _subChartWidth, paperCountValueAccessor);
@@ -480,7 +484,6 @@ var citeSummaryVis = (function () {
 
             minCitationDate.setDate(minCitationDate.getDate() - 30);
             maxCitationDate.setDate(maxCitationDate.getDate() + 30);
-
 
 
             citationRptLine
@@ -577,7 +580,7 @@ var citeSummaryVis = (function () {
                 }, 0
             );
 
-            d3.select("#download_csv").on("click", function(e) {
+            d3.select("#download_csv").on("click", function (e) {
                 var blob = new Blob([d3.csv.format(papersByDate.top(Infinity))],
                     {type: "text/csv;charset=utf-8"});
                 saveAs(blob, 'data.csv');
