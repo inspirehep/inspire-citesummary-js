@@ -13,7 +13,6 @@ Examples are available in the example directory. Simply follow these instruction
     npm install
     gulp build
     
-    cd examples
     python -m SimpleHTTPServer # this will run a web server on localhost:8000 by default. 
 ```
 
