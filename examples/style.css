@@ -1,19 +1,19 @@
 .dc-chart g.row text {
     fill: #2c3e50;
-    font-size: 9px;
+    font-size: 13px;
     cursor: pointer;
     font-weight: bolder;
 }
 
 .dc-chart .pie-slice {
     fill: #2c3e50;
-    font-size: 10px;
+    font-size: 14px;
     cursor: pointer;
     font-weight: bolder;
 }
 
 .dc-legend {
-    font-size: 9px;
+    font-size: 13px;
     font-weight: bolder;
 }
 
@@ -28,7 +28,7 @@
 }
 
 .dc-data-table {
-    font-size: 12px;
+    font-size: 15px;
 }
 
 .table > tbody > tr > td {
@@ -36,7 +36,7 @@
 }
 
 .x-axis-label, .y-axis-label {
-    font-size: 10px;
+    font-size: 13px;
     fill: #2c3e50;
 }
 
